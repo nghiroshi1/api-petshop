@@ -16,5 +16,8 @@
   "bugs": {
     "url": "https://github.com/nghiroshi1/api-petshop/issues"
   },
-  "homepage": "https://github.com/nghiroshi1/api-petshop#readme"
+  "homepage": "https://github.com/nghiroshi1/api-petshop#readme",
+  "dependencies": {
+    "express": "^4.17.1"
+  }
 }
