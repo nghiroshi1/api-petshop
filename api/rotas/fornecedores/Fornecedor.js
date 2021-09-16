@@ -1,4 +1,6 @@
 const TabelaFornecedor = require('./TabelaFornecedor')
+const NaoEncontrado = require('../../../erros/NaoEncontrado')
+const CampoInvalido = require('../../../erros/CampoInvalido')
 
 class Fornecedor{
     constructor({id, empresa, email, categoria, dataCriacao, dataAtualizacao, versao}){
@@ -29,7 +31,7 @@ class Fornecedor{
         await TabelaFornecedor.pesquisarPorId(this.id)
         .then(encontrado => {
             if (!encontrado){
-                return new Promise((resolve, reject) => reject({"mensagem": "Fornecedor não encotrado."}))
+                throw new NaoEncontrado('Fornecedor')
             }
 
             this.id = encontrado.id
@@ -42,14 +44,14 @@ class Fornecedor{
     }
 
     async atualizar(){
+        this.validarCamposObrigatorios()
         await TabelaFornecedor.pesquisarPorId(this.id)
-
-        await TabelaFornecedor.atualizar(this)
+        TabelaFornecedor.atualizar(this)
         
     }
 
     async remover(){
-        await TabelaFornecedor.remover(this.id)
+        TabelaFornecedor.remover(this.id)
     }
 
     validarCamposObrigatorios(){
@@ -57,8 +59,7 @@ class Fornecedor{
         campos.forEach(campo => {
             const valor = this[campo]
             if (typeof valor !== 'string' || valor.length === 0){
-                console.log(`O campo ${campo} está inválido`)
-                throw new Error(`O campo ${campo} está inválido`)
+                throw new CampoInvalido(campo)
             }
         })
     }

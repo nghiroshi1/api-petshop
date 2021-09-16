@@ -7,46 +7,52 @@ roteador.get('/', async (req, res) => {
     res.status(200).json(resultados)
 })
 
-roteador.post('/', async (req, res) => {
+roteador.post('/', async (req, res, proximo) => {
     const dadosRecebidos = req.body
         const fornecedor = new Fornecedor(dadosRecebidos)
         await fornecedor.criar()
             .then(resultados => res.status(201).json(fornecedor))
-            .catch(error => res.status(400).json(error.message))
+            .catch(error => proximo(error))
     
 })
 
-roteador.get('/:id', async (req, res) => {
-    const id = req.params.id
-    const fornecedor = new Fornecedor({id})
-    fornecedor.carregar()
-    .then(resultados => {
+roteador.get('/:id', async (req, res, proximo) => {
+    try{
+        const id = req.params.id
+        const fornecedor = new Fornecedor({ id })
+        await fornecedor.carregar()
         res.status(200).json(fornecedor)
-    })
-    .catch(error => {
-        res.status(404).json(error)
-    })
+    } catch(error){
+        proximo(error)
+    }
 })
 
-roteador.put('/:id', async (req, res) => {
-    const id = req.params.id
-    const dadosRecebidos = req.body
-    const dadosRecebidosComId = {...dadosRecebidos, id}
+roteador.put('/:id', async (req, res, proximo) => {
+    try {
+        const id = req.params.id
+        const dadosRecebidos = req.body
+        const dadosRecebidosComId = { ...dadosRecebidos, id }
 
-    const fornecedor = new Fornecedor(dadosRecebidosComId)
-    await fornecedor.atualizar()
-    .then(resultados => res.status(200).json(fornecedor))
-    .catch(error => res.status(400).json(error))
-    res.end()
+        const fornecedor = new Fornecedor(dadosRecebidosComId)
+        await fornecedor.atualizar()
+        res.status(204).json(fornecedor)
+        res.end()
+    } catch (error) {
+       proximo(error)
+    }
+    
 })
 
-roteador.delete('/:id', async (req, res) => {
-    const id = req.params.id
-    const fornecedor = new Fornecedor({id:id})
-    await fornecedor.carregar()
-        .catch(error => res.status(404).json(error))
-    await fornecedor.remover()
-    res.status(204).end()
+roteador.delete('/:id', async (req, res, proximo) => {
+    try {
+        const id = req.params.id
+        const fornecedor = new Fornecedor({ id: id })
+        await fornecedor.carregar()
+        await fornecedor.remover()
+        res.status(204).end()
+    } catch (error) {
+        proximo(error)
+    }
 })
 
 module.exports = roteador
